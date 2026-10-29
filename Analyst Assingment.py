@@ -7,7 +7,7 @@ import pyodbc
 import urllib.parse
 from pathlib import Path
 
-# Configuration and logging set up
+#Configuration and logging set up
 DATA_DIR = Path(r"C:\Users\mctle\OneDrive\Documents\Domain Expansion\Portfolio Work\71point4 Analyst Assingment")
 META_CSV = DATA_DIR / "ee_meta.csv"
 PROFILE_CSV = DATA_DIR / "ee_profile_all.csv"
@@ -183,8 +183,8 @@ def verify_database_ready() -> None:
     try:
         engine = get_engine()
         with engine.connect() as conn:
-            # Connecting directly to SQL_DATABASE fails if it doesn't exist
-            # or the Windows user has no access to it.
+            #Connecting directly to SQL_DATABASE fails if it doesn't exist
+            #or the Windows user has no access to it.
             tables = conn.execute(text(
                 "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'"
             )).scalar()
@@ -209,7 +209,7 @@ def verify_database_ready() -> None:
 def load(dim: pd.DataFrame, yearly: pd.DataFrame, fact: pd.DataFrame) -> None:
 #Create the tables in the existing empty database and insert the data in one transaction.
     verify_database_ready() 
-    # fast_executemany makes bulk inserts via pyodbc
+    #fast_executemany makes bulk inserts via pyodbc
     engine = get_engine(fast_executemany=True)
  
     #engine.begin() commits on success and rolls back everything on error
@@ -218,7 +218,7 @@ def load(dim: pd.DataFrame, yearly: pd.DataFrame, fact: pd.DataFrame) -> None:
         for statement in filter(None, (s.strip() for s in DDL.split(";"))):
             conn.execute(text(statement))
  
-        # Parents first so foreign keys are satisfied
+        #Parents first so foreign keys are satisfied
         log.info("Loading dim_employer")
         dim.to_sql("dim_employer", conn, schema="dbo", if_exists="append", index=False)
  
