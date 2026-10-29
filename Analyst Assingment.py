@@ -27,8 +27,8 @@ META_ATTRIBUTES = [
                     "industry_sector",
                     "seta_classification",
                     "business_type",
-                    "province",
-                    "city_town"
+                    "province_physical",
+                    "city_town_physical"
 ]
 #Mapping of the expected column names in the ee_profile_all.csv file to the actual column names in the DataFrame
 PROFILE_COLUMNS_MAPPING = {
@@ -83,10 +83,10 @@ def transform_meta(meta: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     for attr in META_ATTRIBUTES:
         yearly[attr] = clean_text(yearly[attr])
 
-    #Dropping employer years on emppty attributes
+    #Dropping employer years on empty attributes
     yearly = yearly.dropna(subset=META_ATTRIBUTES, how="all")
-
-    #Setting up table dimeensions using recent names
+    yearly = yearly.rename(columns={"province_physical": "province","city_town_physical": "city_town"})
+    #Setting up table dimensions using recent names
     latest = (
         yearly.dropna(subset=["dti_registration_name"]).sort_values(["ee_ref", "submission_year"])
         .groupby("ee_ref", as_index=False).last()[["ee_ref", "dti_registration_name"]]
@@ -126,12 +126,12 @@ def transform_profile(profile: pd.DataFrame) -> pd.DataFrame:
 
 
 #Loading Data into an empty database created in SQL Server
-DDL = """CREATE TABLE dbo.dim_employer (
+DDL = """CREATE TABLE dim_employer (
     ee_ref                   VARCHAR(64)   NOT NULL PRIMARY KEY,
     registration_name        NVARCHAR(300) NULL
 );
  
-CREATE TABLE dbo.employer_year_attrs (
+CREATE TABLE employer_year_attrs (
     ee_ref                 VARCHAR(64)   NOT NULL,
     submission_year        SMALLINT      NOT NULL,
     dti_registration_name  NVARCHAR(300) NULL,
@@ -141,10 +141,10 @@ CREATE TABLE dbo.employer_year_attrs (
     province               NVARCHAR(100) NULL,
     city_town              NVARCHAR(150) NULL,
     CONSTRAINT PK_employer_year_attrs PRIMARY KEY (ee_ref, submission_year),
-    CONSTRAINT FK_attrs_employer FOREIGN KEY (ee_ref) REFERENCES dbo.dim_employer (ee_ref)
+    CONSTRAINT FK_attrs_employer FOREIGN KEY (ee_ref) REFERENCES dim_employer (ee_ref)
 );
  
-CREATE TABLE dbo.fact_workforce_profile (
+CREATE TABLE fact_workforce_profile (
     ee_ref           VARCHAR(64)   NOT NULL,
     submission_year  SMALLINT      NOT NULL,
     occupation_level NVARCHAR(200) NOT NULL,
@@ -160,7 +160,7 @@ CREATE TABLE dbo.fact_workforce_profile (
     white_male       INT NOT NULL,
     total_headcount  INT NOT NULL,
     CONSTRAINT PK_fact_workforce PRIMARY KEY (ee_ref, submission_year, occupation_level),
-    CONSTRAINT FK_fact_employer FOREIGN KEY (ee_ref) REFERENCES dbo.dim_employer (ee_ref)
+    CONSTRAINT FK_fact_employer FOREIGN KEY (ee_ref) REFERENCES dim_employer (ee_ref)
 );"""
 def connection_string(database: str) -> str:
     return (
@@ -257,3 +257,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
