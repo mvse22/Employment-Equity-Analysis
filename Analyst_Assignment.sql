@@ -77,10 +77,10 @@ ORDER  BY pct_foreign_nationals DESC;
 --Q5.How many employees are there at the different employment levels
 --and what percentage of the workforce does each make
 SELECT occupation_level,
-       SUM(total_headcount) AS headcount,
+       SUM(total_headcount) AS no_of_employees,
        CAST(ROUND(100.0 * SUM(total_headcount) / SUM(SUM(total_headcount)) OVER (), 1) AS DECIMAL(12,1)) AS pct_of_workforce
 FROM   fact_workforce_profile
 WHERE  submission_year = (SELECT MAX(submission_year)
                           FROM fact_workforce_profile)
 GROUP  BY occupation_level
-ORDER  BY headcount DESC;
+ORDER  BY no_of_employees DESC;
