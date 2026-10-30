@@ -17,7 +17,7 @@ ORDER  BY employees DESC;
 --Q2. Who are the 10 highest employers and what percent are their female hires?
 SELECT TOP 10
        f.ee_ref,
-       COALESCE(a.dti_registration_name, d.registration_name, f.ee_ref) AS employer_name,
+       COALESCE(e.dti_registration_name, d.registration_name, f.ee_ref) AS employer_name,
        e.industry_sector,
        e.province,
        SUM(f.total_headcount) AS employees,
