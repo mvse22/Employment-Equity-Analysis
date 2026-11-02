@@ -7,7 +7,7 @@ import pyodbc
 import urllib.parse
 from pathlib import Path
 
-#Configuration and logging set up
+# Configuration and logging set up
 DATA_DIR = Path(r"C:\Users\mctle\OneDrive\Documents\Domain Expansion\Portfolio Work\71point4 Analyst Assingment")
 META_CSV = DATA_DIR / "ee_meta.csv"
 PROFILE_CSV = DATA_DIR / "ee_profile_all.csv"
@@ -218,7 +218,7 @@ def load(dim: pd.DataFrame, yearly: pd.DataFrame, fact: pd.DataFrame) -> None:
         for statement in filter(None, (s.strip() for s in DDL.split(";"))):
             conn.execute(text(statement))
  
-        #Parents first so foreign keys are satisfied
+        # Parents first so foreign keys are satisfied
         log.info("Loading dim_employer")
         dim.to_sql("dim_employer", conn, schema="dbo", if_exists="append", index=False)
  
@@ -257,4 +257,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
